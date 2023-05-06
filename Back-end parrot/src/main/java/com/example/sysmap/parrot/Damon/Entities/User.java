@@ -16,14 +16,10 @@ public class User {
     private String password;
     //private Profile profile;
 
-    public User(String name, String password, String email){//Profile profile) {
+    public User(String name, String email){//Profile profile) {
         this.id=UUID.randomUUID();
-        this.password=password;
         this.email=email;
         //this.profile=profile;
     }
 
-    public Object map(Object object) {
-        return null;
-    }
 }

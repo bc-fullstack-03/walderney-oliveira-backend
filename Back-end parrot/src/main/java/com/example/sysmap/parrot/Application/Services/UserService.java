@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.sysmap.parrot.Application.Exception.DatabaseException;
@@ -22,6 +23,9 @@ public class UserService implements IUserService {
     @Autowired
     private IUserRepository userRepository;
     
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
     @Override
     public String createUser(UserRequest request) throws IllegalArgumentException, UserAlreadyExistsException, DatabaseException {
         if (request.name.isEmpty() || request.email.isEmpty()) {
@@ -30,11 +34,18 @@ public class UserService implements IUserService {
         if (userRepository.findByEmail(request.email).isPresent()) {
             throw new UserAlreadyExistsException("User com email " + request.email + " ja existe");
         }
-    
+        
         try {
+            var hash = passwordEncoder.encode(request.password);
+            
+           
             //var profile = new Profile(request.profile);
-           var user = new User(request.name, request.password, request.email);//, profile);
+            var user = new User(request.name, request.email);//, profile);
+            
+            user.setPassword(hash); 
+
             userRepository.save(user);
+        
             return user.getId().toString();
         } catch (Exception e) {
             throw new DatabaseException("Erro em salvar o usuário", e);
@@ -92,5 +103,10 @@ public class UserService implements IUserService {
 
         return response;
 
+    }
+    @Override
+    public User getUserEmail(String email) {
+        var user = userRepository.getByEmail(email);
+        return user;
     }
 }
