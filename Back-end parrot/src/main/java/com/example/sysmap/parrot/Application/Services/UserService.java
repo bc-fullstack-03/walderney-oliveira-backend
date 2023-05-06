@@ -9,11 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.sysmap.parrot.Application.Dto.UserRequestReponse.UserReponse;
+import com.example.sysmap.parrot.Application.Dto.UserRequestReponse.UserRequest;
 import com.example.sysmap.parrot.Application.Exception.DatabaseException;
 import com.example.sysmap.parrot.Application.Exception.UserAlreadyExistsException;
 import com.example.sysmap.parrot.Application.Interfaces.IUserService;
-import com.example.sysmap.parrot.Application.Request.UserReponse;
-import com.example.sysmap.parrot.Application.Request.UserRequest;
+import com.example.sysmap.parrot.Damon.Entities.Profile;
 import com.example.sysmap.parrot.Damon.Entities.User;
 import com.example.sysmap.parrot.Infrastructure.IUserRepository;
 
@@ -39,10 +40,10 @@ public class UserService implements IUserService {
             var hash = passwordEncoder.encode(request.password);
             
            
-            //var profile = new Profile(request.profile);
-            var user = new User(request.name, request.email);//, profile);
-            
-            user.setPassword(hash); 
+            var profile = new Profile(request.profile);
+            var user = new User(request.name, request.email, profile);
+            user.setPassword(hash);
+           
 
             userRepository.save(user);
         
@@ -58,8 +59,8 @@ public class UserService implements IUserService {
                 u.getId(),
                 u.getName(),
                 u.getEmail(),
-                u.getPassword()
-                //u.getProfile()
+                u.getPassword(),
+                u.getProfile()
             )).orElse(null);
             
         return response;
@@ -96,10 +97,11 @@ public class UserService implements IUserService {
         user.setName(request.name);
         user.setEmail(request.email);
         user.setPassword(request.password);
+        user.setProfile(request.profile);
 
         userRepository.save(user);
         
-        var response = new UserReponse(user.getId(), user.getName(), user.getEmail(),user.getPassword());
+        var response = new UserReponse(user.getId(), user.getName(), user.getEmail(),user.getPassword(),user.getProfile());
 
         return response;
 
@@ -108,5 +110,11 @@ public class UserService implements IUserService {
     public User getUserEmail(String email) {
         var user = userRepository.getByEmail(email);
         return user;
+ 
     }
+    @Override
+    public User getUserById(UUID id) {
+        return userRepository.findById(id).orElse(null);
+        
+}
 }

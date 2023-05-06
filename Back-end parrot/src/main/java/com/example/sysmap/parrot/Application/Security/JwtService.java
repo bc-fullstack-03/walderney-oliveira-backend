@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -27,6 +29,29 @@ public class JwtService implements IJwtService {
         .signWith(genSignInKey(), SignatureAlgorithm.HS256)
         .compact();
     }
+
+    public boolean isValidToken(String token, UUID userId) {
+        try {
+            // Faz o parsing do token, verificando a assinatura e decodificando os dados do token
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(genSignInKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            // Recupera o ID de usuário e a data de expiração do token
+            String subject = claims.getSubject();
+            Date expiration = claims.getExpiration();
+
+            // Verifica se o ID de usuário corresponde ao fornecido e se o token ainda é válido
+            return userId.toString().equals(subject) && expiration != null && expiration.after(new Date());
+
+        } catch (JwtException | IllegalArgumentException e) {
+            // Trata a exceção se o token for inválido ou expirado
+            return false;
+        }
+    }
+
 
     private Key genSignInKey(){
         return Keys.hmacShaKeyFor( Decoders.BASE64.decode(KEY));

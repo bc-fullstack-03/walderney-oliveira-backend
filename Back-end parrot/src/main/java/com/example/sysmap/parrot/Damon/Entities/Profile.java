@@ -1,5 +1,6 @@
 package com.example.sysmap.parrot.Damon.Entities;
 
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.annotation.Id;
@@ -7,18 +8,19 @@ import org.springframework.data.annotation.Id;
 import lombok.Data;
 
 @Data
-public class Profile  {
+public class Profile {
     
-    @Id
-    private UUID id;
-    private String name;
+    
+    private String username;
     private String imageUrl;
+    private boolean photo= false;
 
     public Profile(Profile profile){
-        this.id = UUID.randomUUID();
-        this.name= getName();
-        this.imageUrl = getImageUrl();
+        this.username= profile.getUsername();
+        this.imageUrl = profile.getImageUrl();
     }
-}
 
+  
+    
+}
     
