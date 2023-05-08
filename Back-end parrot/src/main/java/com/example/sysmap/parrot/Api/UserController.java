@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.sysmap.parrot.Application.Dto.UserRequestReponse.UserReponse;
-import com.example.sysmap.parrot.Application.Dto.UserRequestReponse.UserRequest;
-import com.example.sysmap.parrot.Application.Interfaces.IUserService;
+import com.example.sysmap.parrot.Application.User.Dto.UserRequestReponse.UserReponse;
+import com.example.sysmap.parrot.Application.User.Dto.UserRequestReponse.UserRequest;
+import com.example.sysmap.parrot.Application.User.Services.IUserService;
 
 @RestController
 @RequestMapping("/api/v1/user")

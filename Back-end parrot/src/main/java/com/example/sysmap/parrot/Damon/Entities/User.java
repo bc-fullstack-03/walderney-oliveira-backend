@@ -14,12 +14,14 @@ public class User {
     private String name;
     private String email;
     private String password;
-    private Profile profile;
+    private String imageUrl;
+    private Boolean photo= false;
+    private String username;
 
-    public User(String name, String email,Profile profile) {
+    public User(String name, String email,String username) {
         this.id=UUID.randomUUID();
         this.email=email;
-        this.profile=profile;
+        this.username=username;
     }
 
 }
