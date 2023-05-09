@@ -13,5 +13,6 @@ public interface IUserRepository extends MongoRepository<User, UUID> {
    public Optional<User> findByEmail(String email);
   
    public User getByEmail(String email);
+   public User getByUsername(String username);
     
 }

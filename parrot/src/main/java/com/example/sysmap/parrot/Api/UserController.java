@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.sysmap.parrot.Application.User.Dto.UserRequestReponse.UserReponse;
-import com.example.sysmap.parrot.Application.User.Dto.UserRequestReponse.UserRequest;
+import com.example.sysmap.parrot.Application.User.Dto.UserRequestResponse.UserRequest;
+import com.example.sysmap.parrot.Application.User.Dto.UserRequestResponse.UserResponse;
 import com.example.sysmap.parrot.Application.User.Services.IUserService;
 
 @RestController
@@ -51,7 +51,7 @@ public class UserController {
     }
 
     @GetMapping()
-    private ResponseEntity<UserReponse>findByemail(@RequestParam String email){
+    private ResponseEntity<UserResponse>findByemail(@RequestParam String email){
         var reponse = userService.findByEmail(email);
         
         if(reponse!=null){
@@ -63,7 +63,7 @@ public class UserController {
     
     
     @GetMapping("/all")
-    private ResponseEntity<List<UserReponse>> findByAll(){
+    private ResponseEntity<List<UserResponse>> findByAll(){
 
         var reponse= userService.findAll();
         if(reponse!=null){
@@ -74,7 +74,7 @@ public class UserController {
     }
    
     @PutMapping()
-    private ResponseEntity<UserReponse> updateUsers(@RequestParam String id, @RequestBody UserRequest request){
+    private ResponseEntity<UserResponse> updateUsers(@RequestParam String id, @RequestBody UserRequest request){
         
         var reponse = userService.updateUser(id, request);
         
@@ -85,7 +85,7 @@ public class UserController {
 
     }
 
-    @PostMapping("/friends")
+    @PostMapping("/friends/follow")
     private ResponseEntity<String> followUser(@RequestParam String id){
         
         var response = userService.follow(id);
@@ -96,6 +96,43 @@ public class UserController {
 
         return ResponseEntity.badRequest().build();
     }
+
+    @PostMapping("/friends/unfollow")
+    private ResponseEntity<String>  unfollowwUser(@RequestParam String id){
+        var response = userService.unfllow(id);
+
+        if(response!=null){
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().build();
+    }
+    @GetMapping("/friends/Following")
+    private ResponseEntity<List<UserResponse>> Followers(@RequestParam String username){
+       
+        var response = userService.listFollowersByUsername(username);
+
+        if(response!=null){
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().build();
+
+    }
+    @GetMapping("/friends/following")
+    private ResponseEntity<List<UserResponse>> Following(@RequestParam String username){
+       
+        var response = userService.listFollowingByusername(username);
+
+        if(response!=null){
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().build();
+
+    }
+        
+    
 
     
 }

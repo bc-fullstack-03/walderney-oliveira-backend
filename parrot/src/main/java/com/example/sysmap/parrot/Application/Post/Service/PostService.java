@@ -24,7 +24,7 @@ import com.example.sysmap.parrot.Damon.Entities.Post;
 import com.example.sysmap.parrot.Damon.Entities.User;
 import com.example.sysmap.parrot.Infrastructure.IPostRepository;
 
-import lombok.var;
+
 
 @Service
 public class PostService implements IPostService {
@@ -42,17 +42,17 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public String createPost(String content){
+    public String createPost(String content,MultipartFile photo){
         
         var userAuth = authenticateUser(); 
         var post = new Post(userAuth.getId(),content); 
 
         String photoUri = null;
         
-        if(content == null){// && //photo == null ){
+        if(content == null && photo == null ){
             throw new Exceptions("O post deve ter pelo menos um texto ou imagem");
         }
-        /* 
+        
         if(photo != null) {
             var fileName = post.getId() + "." + photo.getOriginalFilename().substring(photo.getOriginalFilename().lastIndexOf(".") + 1);
             try {
@@ -63,7 +63,7 @@ public class PostService implements IPostService {
 
             post.setImage(photoUri);
         }
-        */
+       
         try {
             
             
@@ -106,9 +106,8 @@ public class PostService implements IPostService {
 
     @Override
     public Post getPostById (String id){
-        return postRepository.findById(UUID.fromString(id)).orElseThrow(
-                () -> new Exceptions("Post não encontrado")
-        );
+        return postRepository.findById(UUID.fromString(id)).orElse(null);
+        
     }
 
     @Override
@@ -161,7 +160,7 @@ public class PostService implements IPostService {
     public String LikePost(String postId) {
         var userAuth = authenticateUser();
     
-        // Encontra a postagem pelo ID
+      
         var post = postRepository.findById(UUID.fromString(postId)).orElse(null);
     
         if (post == null) {
@@ -235,6 +234,48 @@ public class PostService implements IPostService {
         }
         
         return responses;
+    }
+
+    @Override
+    public String deleteCommetPost(String postId) {
+        var userAuth = authenticateUser();
+        var post = postRepository.findById(UUID.fromString(postId)).orElse(null);
+    
+        if (post == null) {
+            return "Post nao encontrado";
+        }
+    
+        for (Comment comment : post.getComments()) {
+            if (comment.getUserId().equals(userAuth)) {
+                post.getComments().remove(comment);
+                postRepository.save(post);
+                return "Comentario deletado com successo";
+            }
+        }
+        return "Commentario nao encotrado ou user sem permissão";
+       
+    }
+
+
+    @Override
+    public String udpateComment(CommentRequest request, String postId) {
+        var userAuth = authenticateUser();
+        var post = postRepository.findById(UUID.fromString(postId)).orElse(null);
+        
+        if (post == null) {
+            return "Post nao encotrado";
+        }
+
+        for (Comment comment : post.getComments()) {
+            if (comment.getId().equals((request.id)) && comment.getUserId().equals(userAuth)) {
+                comment.setContext(request.content);
+                postRepository.save(post);
+                return request.content;
+            }
+        }
+
+        return "Commentario nao encotrado ou user sem permissão";
+
     }
 }
 

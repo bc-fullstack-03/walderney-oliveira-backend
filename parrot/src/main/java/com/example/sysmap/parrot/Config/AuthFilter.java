@@ -34,17 +34,21 @@ public class AuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+            throws ServletException, IOException{
     
         String servletPath = request.getServletPath();
-        if (servletPath.contains("api/v1/authentication") ||
-            servletPath.contains("swagger") ||
-            servletPath.contains("docs") ||
-            (request.getMethod().equals("POST") && servletPath.contains("api/v1/user/endpoint"))) 
-        {
-        filterChain.doFilter(request, response);
-        return;
-}
+        if (servletPath.contains("api/v1/authentication") || servletPath.contains("swagger") || servletPath.contains("docs")){
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
+        
+        if (request.getMethod().equalsIgnoreCase("POST") && request.getRequestURI().endsWith("/api/v1/user")){
+            filterChain.doFilter(request, response);
+            return;
+        }      
+         
+        
     
         String token = request.getHeader("Authorization");
         String userId = request.getHeader("RequestedBy");
@@ -58,13 +62,13 @@ public class AuthFilter extends OncePerRequestFilter {
         
         boolean isValidToken = jwtService.isValidToken(token.replace("Bearer ", ""), UUID.fromString(userId));
         
-        if (!isValidToken) {
+        if (!isValidToken){
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
            
             response.getWriter().write("Token inválido ou expirado");
             return;
         }
-        if (isValidToken) {
+        if (isValidToken){ 
             try {
                 var user = userService.getUserById(UUID.fromString(userId));
 
@@ -75,7 +79,7 @@ public class AuthFilter extends OncePerRequestFilter {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 return;
             }
-        } else {
+        }else {
             response.getWriter().write("Token inválido!");
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return;
@@ -83,9 +87,5 @@ public class AuthFilter extends OncePerRequestFilter {
        
         filterChain.doFilter(request, response);
     }
-    
-    
-    
-   
-    
 }
+    

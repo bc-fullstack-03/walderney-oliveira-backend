@@ -14,8 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.sysmap.parrot.Application.Exception.DatabaseException;
 import com.example.sysmap.parrot.Application.Exception.Exceptions;
-import com.example.sysmap.parrot.Application.User.Dto.UserRequestReponse.UserReponse;
-import com.example.sysmap.parrot.Application.User.Dto.UserRequestReponse.UserRequest;
+import com.example.sysmap.parrot.Application.User.Dto.UserRequestResponse.UserRequest;
+import com.example.sysmap.parrot.Application.User.Dto.UserRequestResponse.UserResponse;
 import com.example.sysmap.parrot.Config.Aws.IAwsFileService;
 import com.example.sysmap.parrot.Damon.Entities.User;
 import com.example.sysmap.parrot.Infrastructure.IUserRepository;
@@ -33,10 +33,8 @@ public class UserService implements IUserService {
     private IAwsFileService awsFileService;
     
     @Override
-    public String createUser(UserRequest request) throws IllegalArgumentException, Exceptions, DatabaseException {
-        if (request.name.isEmpty() || request.email.isEmpty()) {
-            throw new IllegalArgumentException("Nome e email estão vazios");
-        }
+    public String createUser(UserRequest request)  {
+       
         if (userRepository.findByEmail(request.email).isPresent()) {
             throw new Exceptions("User com email " + request.email + " ja existe");
         }
@@ -57,9 +55,9 @@ public class UserService implements IUserService {
         }
     }
     @Override
-    public UserReponse findByEmail(String email) {
+    public UserResponse findByEmail(String email) {
         var user = userRepository.findByEmail(email);
-        var response = user.map(u -> new UserReponse(
+        var response = user.map(u -> new UserResponse(
                 u.getId(),
                 u.getName(),
                 u.getEmail(),
@@ -84,18 +82,18 @@ public class UserService implements IUserService {
     }
     
     @Override
-    public List<UserReponse> findAll() {
+    public List<UserResponse> findAll() {
         var users = userRepository.findAll();
-        var responses = new ArrayList<UserReponse>();
+        var responses = new ArrayList<UserResponse>();
         for (var user : users) {
-            var response = new UserReponse(user);
+            var response = new UserResponse(user);
             responses.add(response);
         }
         return responses;
     }
    
     @Override
-    public UserReponse updateUser(String id ,UserRequest request){
+    public UserResponse updateUser(String id ,UserRequest request){
         UUID idAux = UUID.fromString(id);
         User user = userRepository.findById(idAux).get();
         var hash = passwordEncoder.encode(request.password);
@@ -109,7 +107,7 @@ public class UserService implements IUserService {
 
         userRepository.save(user);
         
-        var response = new UserReponse(user.getId(), 
+        var response = new UserResponse(user.getId(), 
         user.getName(), 
         user.getEmail(),
         user.getPassword(),
@@ -153,15 +151,69 @@ public class UserService implements IUserService {
         var user = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
         
-        if (user.getId().equals(id)) {
+        if (user.getId().toString().equals(id)) {
             throw new Exceptions("Não é possível seguir seu próprio perfil");
         }else{
             user.followUser(id);
             userRepository.save(user);
-            return "Seguindo o amigo " + id.toString();
+            return "Seguindo o amigo ";
         }   
         
 
+    }
+    @Override
+    public String unfllow(String id) {
+        var user = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+        
+        if (user.getId().toString().equals(id)) {
+            throw new Exceptions("Não é possível seguir seu próprio perfil");
+        }else{
+            user.unfollowUser(id);
+            userRepository.save(user);
+            return "Deixando ser amigo ";
+        }   
+    }
+    @Override
+    public List<UserResponse> listFollowersByUsername(String username) {
+        var user = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        user = userRepository.getByUsername(username);
+        if (user == null) {
+            throw new Exceptions("Usuário não encontrado");
+        }
+        var responses = new ArrayList<UserResponse>();
+        for (UUID followerId : user.getFollowers()) {
+            var follower = userRepository.findById(followerId).orElse(null);
+            if (follower != null) {
+                var response = new UserResponse(follower);
+                responses.add(response);
+            }
+        }
+        return responses;
+
+
+    }
+    @Override
+    public List<UserResponse> listFollowingByusername(String username) {
+        var user = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        user = userRepository.getByUsername(username);
+        var responses = new ArrayList<UserResponse>();
+        var following = user.getFollowing();
+        for (UUID followingId : following) {
+            var followingUser = userRepository.findById(followingId).orElse(null);
+            if (followingUser != null) {
+                responses.add(new UserResponse(followingUser));
+            }
+        }
+        return responses;
+    }
+  
+    
+
+
+    @Override
+    public User getUserByUsername(String username) {
+        return userRepository.getByUsername(username);
     }
 
 }
