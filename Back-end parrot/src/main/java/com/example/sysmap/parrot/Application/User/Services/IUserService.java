@@ -19,5 +19,6 @@ public  interface IUserService {
     public User getUserEmail(String email);
     public User getUserById(UUID id);
     public void uploadPhoto(MultipartFile photo);
+    public String follow(String id);
     
 }

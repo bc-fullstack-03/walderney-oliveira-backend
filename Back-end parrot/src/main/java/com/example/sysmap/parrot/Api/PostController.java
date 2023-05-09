@@ -30,8 +30,8 @@ public class PostController {
     private IPostService postService;
 
     @PostMapping()
-    public ResponseEntity<Object> createPost(@RequestParam String content, @RequestPart MultipartFile photo) {
-        var response = postService.createPost(content, photo);
+    public ResponseEntity<Object> createPost(@RequestParam String content){//, @RequestPart MultipartFile photo) {
+        var response = postService.createPost(content);//, photo);
 
         
         if(response!=null){
@@ -82,6 +82,32 @@ public class PostController {
         }
         return ResponseEntity.badRequest().build();
     }
+    @PostMapping("/comments")
+    public ResponseEntity<String> CommentPost(@RequestParam String postId, @RequestBody CommentRequest request) {
+        var response = postService.createCommentPost(postId, request);
+        if(response!=null){
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.badRequest().build();
+        
+    }
+
+    @PostMapping("/likes")
+    public ResponseEntity<String> likeRemovePost(@RequestParam String postId) {
+        var response = postService.LikePost(postId);
+        if(response!=null){
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.badRequest().build();
+    }
    
+    @PostMapping("/{postId}/comments/{commentId}/likes")
+    public ResponseEntity<String> likeRemoveComment(@RequestParam  String postId, @RequestParam  String commentId) {
+        var response = postService.likeComment(postId, commentId);
+        if(response!=null){
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.badRequest().build();
+    }
     
 }

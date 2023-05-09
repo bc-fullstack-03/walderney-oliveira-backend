@@ -15,11 +15,11 @@ public class PostReponse {
     private UUID id;
     private String content;
     private UUID userId;
-    private ArrayList<User>likes;
+    private ArrayList<UUID>likes;
     private ArrayList<Comment> comments;
     private String image;
     
-    public PostReponse(UUID id, String content, UUID userId, ArrayList<User> likes, ArrayList<Comment> comments,
+    public PostReponse(UUID id, String content, UUID userId, ArrayList<UUID> likes, ArrayList<Comment> comments,
             String image) {
         this.id = id;
         this.content = content;

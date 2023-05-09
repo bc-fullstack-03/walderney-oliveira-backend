@@ -2,6 +2,7 @@ package com.example.sysmap.parrot.Api;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -82,6 +83,18 @@ public class UserController {
         }
         return ResponseEntity.badRequest().build();
 
+    }
+
+    @PostMapping("/friends")
+    private ResponseEntity<String> followUser(@RequestParam String id){
+        
+        var response = userService.follow(id);
+
+        if(response!=null){
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().build();
     }
 
     

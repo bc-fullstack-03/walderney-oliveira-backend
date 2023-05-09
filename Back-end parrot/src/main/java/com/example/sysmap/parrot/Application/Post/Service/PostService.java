@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.ObjectUtils.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.sysmap.parrot.Application.Comment.CommentReponse;
 import com.example.sysmap.parrot.Application.Comment.CommentRequest;
 import com.example.sysmap.parrot.Application.Exception.DatabaseException;
 import com.example.sysmap.parrot.Application.Exception.Exceptions;
@@ -21,6 +23,8 @@ import com.example.sysmap.parrot.Damon.Entities.Comment;
 import com.example.sysmap.parrot.Damon.Entities.Post;
 import com.example.sysmap.parrot.Damon.Entities.User;
 import com.example.sysmap.parrot.Infrastructure.IPostRepository;
+
+import lombok.var;
 
 @Service
 public class PostService implements IPostService {
@@ -38,17 +42,17 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public String createPost(String content,MultipartFile photo){
+    public String createPost(String content){
         
         var userAuth = authenticateUser(); 
         var post = new Post(userAuth.getId(),content); 
 
         String photoUri = null;
         
-        if(content == null && photo == null ){
+        if(content == null){// && //photo == null ){
             throw new Exceptions("O post deve ter pelo menos um texto ou imagem");
         }
-
+        /* 
         if(photo != null) {
             var fileName = post.getId() + "." + photo.getOriginalFilename().substring(photo.getOriginalFilename().lastIndexOf(".") + 1);
             try {
@@ -59,7 +63,7 @@ public class PostService implements IPostService {
 
             post.setImage(photoUri);
         }
-
+        */
         try {
             
             
@@ -88,6 +92,7 @@ public class PostService implements IPostService {
 
     @Override
     public List<PostReponse> findPostById(String id) {
+    
         List<Post> posts = postRepository.findPostById(UUID.fromString(id));
         List<PostReponse> reponses= new ArrayList<>();
         for(Post post : posts) {
@@ -149,6 +154,87 @@ public class PostService implements IPostService {
         post.getComments().add(comment);
         postRepository.save(post);
         return comment.getId().toString();
+    }
+
+
+    @Override
+    public String LikePost(String postId) {
+        var userAuth = authenticateUser();
+    
+        // Encontra a postagem pelo ID
+        var post = postRepository.findById(UUID.fromString(postId)).orElse(null);
+    
+        if (post == null) {
+            throw new Exceptions("Post não encontrado!");
+        }
+    
+        // Verifica se o usuário já deu like na postagem
+        boolean userLikedPost = post.getLikes().contains(userAuth.getId());
+    
+        // Adiciona ou remove o like dependendo da situação atual
+        if (userLikedPost) {
+            post.getLikes().remove(userAuth.getId());
+            postRepository.save(post);
+            return "Like removido";
+        } else {
+            post.getLikes().add(userAuth.getId());
+            postRepository.save(post);
+            return "Like adicionado";
+        }
+       
+    }
+    @Override
+    public String likeComment(String postId, String commentId) {
+        var userAuth = authenticateUser();
+        var post = postRepository.findById(UUID.fromString(postId)).orElse(null);
+    
+        if (post == null) {
+            throw new Exceptions("Post não encontrado!");
+        }
+    
+
+        Comment comment = null;
+        for (Comment c : post.getComments()) {
+            if (c.getId().equals(UUID.fromString(commentId))) {
+                comment = c;
+                break;
+            }
+        }
+    
+        if (comment == null) {
+            throw new Exceptions("Comentário não encontrado!");
+        }
+    
+       
+        boolean userLikedComment = comment.getLikes().contains(userAuth.getId());
+    
+        if (userLikedComment) {
+            comment.getLikes().remove(userAuth.getId());
+            postRepository.save(post);
+            return "Like removido";
+        } else {
+            comment.getLikes().add(userAuth.getId());
+            postRepository.save(post);
+            return "Like adicionado";
+        }
+    }
+
+
+    @Override
+    public List<CommentReponse> findAllCommentById(String id) {
+        var userAuth = authenticateUser();
+        var post = postRepository.findById(UUID.fromString(id)).orElse(null);
+        
+        if (post == null) {
+            throw new Exceptions("Post não encontrado!");
+        }
+        
+        var responses = new ArrayList<CommentReponse>();
+        for (Comment comment : post.getComments()) {
+            responses.add(new CommentReponse(comment));
+        }
+        
+        return responses;
     }
 }
 

@@ -147,4 +147,22 @@ public class UserService implements IUserService {
         user.setImageUrl(photoUri);
         userRepository.save(user);
     }
+
+    @Override
+    public String follow(String id) {
+        var user = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+        
+        if (user.getId().equals(id)) {
+            throw new Exceptions("Não é possível seguir seu próprio perfil");
+        }else{
+            user.followUser(id);
+            userRepository.save(user);
+            return "Seguindo o amigo " + id.toString();
+        }   
+        
+
+    }
+
 }
+

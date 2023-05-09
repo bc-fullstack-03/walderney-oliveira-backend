@@ -14,7 +14,7 @@ public class Post {
     private UUID id;
     private UUID userId;
     private String content;
-    private ArrayList<User>likes;
+    private ArrayList<UUID>likes;
     private ArrayList<Comment> comments;
     private String image;
     

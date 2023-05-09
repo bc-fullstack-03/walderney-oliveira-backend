@@ -16,7 +16,7 @@ public class Comment {
     private UUID id;
     private String context;
     private UUID userId;
-    private ArrayList<User> likes;
+    private ArrayList<UUID> likes;
     private ArrayList<Comment> comments;
 
     

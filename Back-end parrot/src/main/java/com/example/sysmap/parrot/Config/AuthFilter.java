@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -37,8 +38,6 @@ public class AuthFilter extends OncePerRequestFilter {
     
         String servletPath = request.getServletPath();
         if (servletPath.contains("api/v1/authentication") ||
-            servletPath.contains("api/v1/user") ||
-            servletPath.contains("api/v1/post") ||
             servletPath.contains("swagger") ||
             servletPath.contains("docs") ||
             (request.getMethod().equals("POST") && servletPath.contains("api/v1/user/endpoint"))) 
@@ -63,6 +62,22 @@ public class AuthFilter extends OncePerRequestFilter {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
            
             response.getWriter().write("Token inválido ou expirado");
+            return;
+        }
+        if (isValidToken) {
+            try {
+                var user = userService.getUserById(UUID.fromString(userId));
+
+                var authentication = new UsernamePasswordAuthenticationToken(user, null, null);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } catch (Exception e) {
+                response.getWriter().write(e.getMessage());
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                return;
+            }
+        } else {
+            response.getWriter().write("Token inválido!");
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return;
         }
        
