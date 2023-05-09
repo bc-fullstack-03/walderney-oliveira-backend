@@ -53,31 +53,5 @@ Repositório destinado compartilhamento dos códigos referentes ao backend da ap
 
 Falta a autorização pelo swagger
 
-
-## Como executar o projeto ✍️
-#### Abra o terminal na pasta que contém o arquivo docker-compose.yml e digite o seguinte comando
-```bash
-  docker compose up -d
-```
-#### Agora que os contêineres das imagens estão rodando localmente com as configurações do arquivo docker-compose.yml, já é possível utilizar a aplicação.
-
-### ⚠ ⚠ Lembrando, para acessar o LocalStack, use as seguintes informaçõe: 
-```bash
-  aws configure --profile default
-```
-```bash
-  docker exec -it localhost_demo bash
-    AWS Access Key ID [None]: mykey
-    AWS Secret Access Key [None]: mykey
-    Default region name [None]: us-west-2
-    Default output format [None]: json
-  root:opt/code/Localstack# aws s3 mb s3://demo-bucket --endpoint -url http://localhost:4566
-
-```
-#### Para acessar as urls:
-  swagger (http://localhost:8082/swagger-ui.html)  
-  postman : (http://localhost:8082)
-
-
 ## 🛠 Habilidades
 #### Java, Spring, Docker, Swagger
